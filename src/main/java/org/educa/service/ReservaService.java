@@ -12,15 +12,15 @@ import java.util.List;
 public class ReservaService {
     ReservaDAO reservaDAO= new ReservaDAOImpl();
     public List<ReservaEntity> findReservasByVueloId(Integer vueloId) {
-        return null;
+        return reservaDAO.findReservasByVueloId(vueloId);
     }
 
     public InfoPasajero findReservasByPasaporte(String pasaporte) {
-        return null;
+        return reservaDAO.findReservasByPasaporte(pasaporte);
     }
 
     public List<ReservaWithRelations> findReservasByCantidad(BigDecimal cantidad) {
-        return null;
+        return reservaDAO.findReservasByCantidad(cantidad);
     }
 
     public Integer save(ReservaEntity reserva) {
@@ -28,18 +28,18 @@ public class ReservaService {
     }
 
     public ReservaEntity findById(int id) {
-        return null;
+        return reservaDAO.findById(id);
     }
 
     public Long update(ReservaEntity reservaToUpdate) {
-        return null;
+        return reservaDAO.update(reservaToUpdate);
     }
 
     public Long delete(int id) {
-        return null;
+        return reservaDAO.delete(id);
     }
 
     public List<ReservaEntity> findAll() {
-        return null;
+        return reservaDAO.findAll();
     }
 }
