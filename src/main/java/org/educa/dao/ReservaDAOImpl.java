@@ -16,6 +16,7 @@ import org.educa.entity.ReservaEntity;
 import org.educa.entity.ReservaWithRelations;
 import org.educa.settings.DatabaseSettings;
 import org.educa.wrappers.InfoPasajero;
+import org.educa.wrappers.VueloWithPrecio;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -109,18 +110,23 @@ public class ReservaDAOImpl implements ReservaDAO {
     @Override
     public InfoPasajero findReservasByPasaporte(String pasaporte) {
         List<ReservaWithRelations> reservas= new ArrayList<>();
+        List<VueloWithPrecio> vuelos= new ArrayList<>();
+        InfoPasajero infoPasajero= new InfoPasajero();
         try(MongoClient mongoClient = MongoClients.create(DatabaseSettings.getURL())) {
             MongoDatabase mongoDatabase = mongoClient.getDatabase(DatabaseSettings.getDB());
-            MongoCollection<Document> collectionPasajeros = mongoDatabase.getCollection(COLLECTION_PASAJEROS);
-            MongoCollection<Document> collectionReservas = mongoDatabase.getCollection(COLLECTION_RESERVAS);
-            Bson filter= Filters.text(pasaporte);
-            Document doc= collectionPasajeros.find(filter).first();
-            PasajeroEntity pasajero= gson.fromJson(doc.toJson(), PasajeroEntity.class);
-            InfoPasajero infoPasajero = new InfoPasajero();
-            infoPasajero.setPasajero(pasajero);
 
+            MongoCollection<Document> collectionPasajeros = mongoDatabase.getCollection(COLLECTION_PASAJEROS);
+
+            Bson filter= Filters.eq("pasaporte",pasaporte);
+            Document doc= collectionPasajeros.find(filter).first();
+
+            if (doc != null) {
+                infoPasajero.setPasajero(gson.fromJson(doc.toJson(), PasajeroEntity.class));
+            }
+
+            MongoCollection<Document> collectionReservas = mongoDatabase.getCollection(COLLECTION_RESERVAS);
             List<Bson> pipeline = Arrays.asList(
-                    Aggregates.match(Filters.gte("pasajero_id",pasajero.getId())),
+                    Aggregates.match(Filters.eq("pasajero_id",infoPasajero.getPasajero().getId())),
                     Aggregates.lookup("vuelos","vuelo_id","_id","vuelo"),
                     Aggregates.lookup("pasajeros","pasajero_id","_id","pasajero"),
                     Aggregates.unwind("$vuelo"),
@@ -133,9 +139,17 @@ public class ReservaDAOImpl implements ReservaDAO {
                 reservas.add(reserva);
             }
 
+            for (ReservaWithRelations reserva : reservas) {
+                VueloWithPrecio vueloWithPrecio= new VueloWithPrecio();
+                vueloWithPrecio.setPrecio(reserva.getPrecio());
+                vueloWithPrecio.setVuelo(reserva.getVuelo());
+                vueloWithPrecio.setEstado(reserva.getEstado());
+                vuelos.add(vueloWithPrecio);
+            }
+            infoPasajero.setVuelos(vuelos);
         }
 
-        return null;
+        return infoPasajero;
     }
 
     @Override
