@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.educa"},{"l":"org.educa.dao"},{"l":"org.educa.entity"},{"l":"org.educa.service"},{"l":"org.educa.settings"},{"l":"org.educa.wrappers"}];updateSearchResults();
