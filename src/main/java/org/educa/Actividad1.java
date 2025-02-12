@@ -86,7 +86,7 @@ public class Actividad1 {
         BigDecimal precio = scanner.nextBigDecimal();
         scanner.nextLine(); // Consumir la nueva línea
         //si el precio es mayor que 0 actualizo el precio, si no dejo el precio actual
-        if (precio.doubleValue()>0) {
+        if (precio.doubleValue() > 0) {
             reservaToUpdate.setPrecio(precio);
         }
         System.out.print("Ingrese el nuevo asiento de la reserva (actual " + reservaToUpdate.getAsiento() + "): ");

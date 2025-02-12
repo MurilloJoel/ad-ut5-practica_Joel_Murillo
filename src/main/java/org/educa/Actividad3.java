@@ -8,7 +8,7 @@ import java.util.Scanner;
 public class Actividad3 {
     public static void main(String[] args) {
         ReservaService reservaService = new ReservaService();
-        try(Scanner sc = new Scanner(System.in)) {
+        try (Scanner sc = new Scanner(System.in)) {
             System.out.println("Introduce un pasaporte");
             String pasaporte = sc.nextLine();
             InfoPasajero reserva = reservaService.findReservasByPasaporte(pasaporte);

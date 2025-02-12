@@ -7,6 +7,12 @@ import org.educa.entity.PasajeroEntity;
 
 import java.util.List;
 
+/**
+ * Wrapper para mostrar los datos correspondiente a mostrar la informacion de los Pasajeros y sus Vuelos con los precios
+ *
+ * @author Joel Murillo Masa
+ */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

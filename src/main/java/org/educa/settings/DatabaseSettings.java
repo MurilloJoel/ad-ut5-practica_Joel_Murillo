@@ -6,6 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Clase de configuracion relacionada con la base de datos
+ *
+ * @author Joel Murillo Masa
+ */
+
 @Getter
 public class DatabaseSettings {
 

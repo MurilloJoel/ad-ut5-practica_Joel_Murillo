@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * Entidad correspondiente a la coleccion de Vuelos de la base de datos
+ *
+ * @author Joel Murillo Masa
+ */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

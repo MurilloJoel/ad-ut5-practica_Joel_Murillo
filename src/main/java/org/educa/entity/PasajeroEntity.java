@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * Entidad correspondiente a la coleccion de Pasajeros de la base de datos
+ *
+ * @author Joel Murillo Masa
+ */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

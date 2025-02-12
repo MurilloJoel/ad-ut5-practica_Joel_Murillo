@@ -6,6 +6,12 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * Wrapper para mostrar los datos correspondiente al Vuelo y su beneficio
+ *
+ * @author Joel Murillo Masa
+ */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

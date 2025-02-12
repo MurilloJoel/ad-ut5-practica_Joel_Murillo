@@ -8,6 +8,13 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * Entidad correspondiente a la coleccion Vuelos, pero con las relaciones pertinentes con Aeropuerto
+ *
+ * @author Joel Murillo Masa
+ */
+
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

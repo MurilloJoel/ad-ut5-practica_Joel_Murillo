@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class Actividad2 {
     public static void main(String[] args) {
         ReservaService reservaService = new ReservaService();
-        try(Scanner sc = new Scanner(System.in)) {
+        try (Scanner sc = new Scanner(System.in)) {
             System.out.println("Introduce un cantidad");
             BigDecimal cantidad = sc.nextBigDecimal();
             sc.nextLine();

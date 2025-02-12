@@ -7,6 +7,11 @@ import org.educa.wrappers.InfoPasajero;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Interfaz que declara los metodos relacionados con la reserva.
+ *
+ * @author Joel Murillo Masa
+ */
 public interface ReservaDAO {
     Integer save(ReservaEntity reserva);
 

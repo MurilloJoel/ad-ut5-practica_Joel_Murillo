@@ -1,114 +1,113 @@
 package org.educa.dao;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mongodb.client.*;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
 import org.bson.Document;
-import org.educa.entity.AeropuertoEntity;
+import org.bson.conversions.Bson;
 import org.educa.entity.ReservaEntity;
+import org.educa.entity.ReservaWithRelations;
 import org.educa.entity.VueloWithRelations;
 import org.educa.settings.DatabaseSettings;
 import org.educa.wrappers.BeneficioVuelo;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Clase que define los metodos implementados por la interfaz VueloDAO
+ *
+ * @author Joel Murillo Masa
+ */
+
 public class VueloDAOImpl implements VueloDAO {
-    private final MongoCollection<Document> vuelos;
-    private final MongoCollection<Document> reservas;
+    private final static String COLLECTION_VUELOS = "vuelos";
+    private final static String COLLECTION_RESERVAS = "reservas";
+    private final Gson gson = new GsonBuilder().create();
 
-    public VueloDAOImpl() {
-        // Inicializar el cliente de MongoDB
-        MongoClient mongoClient = MongoClients.create(DatabaseSettings.getURL());
-        MongoDatabase database = mongoClient.getDatabase(DatabaseSettings.getDB());
-
-        // Inicializar las colecciones
-        this.vuelos = database.getCollection("vuelos");
-        this.reservas = database.getCollection("reservas");
-    }
+    /**
+     * Obtiene los beneficios de los vuelos
+     *
+     * @return Se devuelve una lista con los beneficios obtenidos
+     */
     @Override
     public List<BeneficioVuelo> getBeneficioVuelo() {
+        List<VueloWithRelations> vueloWithRelations = new ArrayList<>();
+        List<BeneficioVuelo> beneficioVuelos = new ArrayList<>();
+        try (MongoClient mongoClient = MongoClients.create(DatabaseSettings.getURL())) {
+            MongoDatabase mongoDatabase = mongoClient.getDatabase(DatabaseSettings.getDB());
 
-        for (VueloWithRelations vuelo : vuelos) {
-            List<ReservaEntity> reservas = findReservasByVueloId(vuelo.getId());
-            BigDecimal totalRecaudado = BigDecimal.ZERO;
-            int totalPasajeros = 0;
-
-            for (ReservaEntity reserva : reservas) {
-                BigDecimal monto = reserva.getEstado().equalsIgnoreCase("cancelada")
-                        ? reserva.getPrecio().divide(BigDecimal.valueOf(2), 2, BigDecimal.ROUND_HALF_UP)
-                        : reserva.getPrecio();
-                totalRecaudado = totalRecaudado.add(monto);
-                totalPasajeros += 1; // Cada reserva representa un pasajero
+            MongoCollection<Document> collection = mongoDatabase.getCollection(COLLECTION_VUELOS);
+            List<Bson> pipeline = Arrays.asList(
+                    Aggregates.lookup("aeropuertos", "origen_id", "_id", "origen"),
+                    Aggregates.lookup("aeropuertos", "destino_id", "_id", "destino"),
+                    Aggregates.unwind("$origen"),
+                    Aggregates.unwind("$destino")
+            );
+            AggregateIterable<Document> aggregateIterable = collection.aggregate(pipeline);
+            for (Document document : aggregateIterable) {
+                vueloWithRelations.add(gson.fromJson(document.toJson(), VueloWithRelations.class));
+            }
+            for (VueloWithRelations vuelo : vueloWithRelations) {
+                BeneficioVuelo beneficioVuelo = new BeneficioVuelo();
+                beneficioVuelo.setCodigoVuelo(vuelo.getCodigoVuelo());
+                beneficioVuelo.setCoste(vuelo.getCoste());
+                beneficioVuelo.setOrigen(vuelo.getOrigen().getNombre());
+                beneficioVuelo.setDestino(vuelo.getDestino().getNombre());
+                //Encontrar el total de pasajeros de cada vuelo
+                beneficioVuelo.setNumPasajeros(findPasajeros(vuelo.getId()));
+                beneficioVuelos.add(beneficioVuelo);
             }
 
-            BeneficioVuelo beneficio = new BeneficioVuelo(
-                    vuelo.getCodigoVuelo(),
-                    vuelo.getOrigen().getNombre(),
-                    vuelo.getDestino().getNombre(),
-                    totalPasajeros,
-                    totalRecaudado,
-                    vuelo.getCoste(),
-                    totalRecaudado.subtract(vuelo.getCoste())
-            );
+            return beneficioVuelos;
 
-            beneficios.add(beneficio);
         }
-
-        return beneficios;
-}
-    private List<VueloWithRelations> findAllVuelos() {
-        List<VueloWithRelations> vuelos = new ArrayList<>();
-
-        for (Document doc : vuelos.find()) {
-            VueloWithRelations vuelo = new VueloWithRelations(
-                    doc.getInteger("_id"),
-                    doc.getString("codigo_vuelo"),
-                    parseAeropuerto(doc.get("origen", Document.class)),
-                    parseAeropuerto(doc.get("destino", Document.class)),
-                    doc.getInteger("duracion"),
-                    doc.getString("estado"),
-                    doc.getString("fecha"),
-                    doc.get("coste", BigDecimal.class)
-            );
-            vuelos.add(vuelo);
-        }
-
-        return vuelos;
     }
 
-    private List<ReservaEntity> findReservasByVueloId(Integer vueloId) {
-        List<ReservaEntity> reservas = new ArrayList<>();
-
-        for (Document doc : reservas.find(eq("vuelo_id", vueloId))) {
-            ReservaEntity reserva = new ReservaEntity(
-                    doc.getInteger("_id"),
-                    doc.getInteger("vuelo_id"),
-                    doc.getInteger("pasajero_id"),
-                    doc.getString("asiento"),
-                    doc.getString("estado"),
-                    doc.get("precio", BigDecimal.class)
+    /**
+     * Busca todas las reservas
+     *
+     * @return Se devuelve una lista con todas las reservas
+     */
+    @Override
+    public List<ReservaWithRelations> findAll() {
+        List<ReservaWithRelations> reservas = new ArrayList<>();
+        try (MongoClient mongoClient = MongoClients.create(DatabaseSettings.getURL())) {
+            MongoDatabase mongoDatabase = mongoClient.getDatabase(DatabaseSettings.getDB());
+            MongoCollection<Document> collection = mongoDatabase.getCollection(COLLECTION_RESERVAS);
+            List<Bson> pipeline = Arrays.asList(
+                    Aggregates.lookup("vuelos", "vuelo_id", "_id", "vuelo"),
+                    Aggregates.unwind("$vuelo")
             );
-            reservas.add(reserva);
+            AggregateIterable<Document> aggregateIterable = collection.aggregate(pipeline);
+            for (Document document : aggregateIterable) {
+                reservas.add(gson.fromJson(document.toJson(), ReservaWithRelations.class));
+            }
         }
-
         return reservas;
     }
 
-    private AeropuertoEntity parseAeropuerto(Document aeropuertoDoc) {
-        if (aeropuertoDoc == null) {
-            return null;
+    /**
+     * Busca cuantos pasajeros hay con el id de ese vuelo
+     *
+     * @param id ID del vuelo a buscar
+     * @return Se devuelve el numero de pasajeros que tiene ese vuelo
+     */
+    private Integer findPasajeros(Integer id) {
+        List<ReservaEntity> reservaEntityList = new ArrayList<>();
+        try (MongoClient mongoClient = MongoClients.create(DatabaseSettings.getURL())) {
+            MongoDatabase mongoDatabase = mongoClient.getDatabase(DatabaseSettings.getDB());
+            MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(COLLECTION_RESERVAS);
+            FindIterable<Document> findIterable = mongoCollection.find(Filters.eq("vuelo_id", id));
+            for (Document document : findIterable) {
+                reservaEntityList.add(gson.fromJson(document.toJson(), ReservaEntity.class));
+            }
+            return reservaEntityList.size();
         }
-        return new AeropuertoEntity(
-                aeropuertoDoc.getInteger("_id"),
-                aeropuertoDoc.getString("nombre"),
-                aeropuertoDoc.getString("ciudad"),
-                aeropuertoDoc.getString("pais"),
-                aeropuertoDoc.getString("codigo_IATA")
-        );
     }
 }
-    }
 

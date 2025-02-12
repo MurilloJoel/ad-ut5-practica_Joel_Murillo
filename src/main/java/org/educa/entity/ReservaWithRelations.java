@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * Entidad correspondiente a la coleccion Reservas, pero con las relaciones con Vuelos y Pasajeros
+ *
+ * @author Joel Murillo Masa
+ */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -7,6 +7,12 @@ import org.educa.entity.VueloEntity;
 
 import java.math.BigDecimal;
 
+/**
+ * Wrapper para mostrar la informacion correspondiente a los Vuelos con sus correspondientes precios
+ *
+ * @author Joel Murillo Masa
+ */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
