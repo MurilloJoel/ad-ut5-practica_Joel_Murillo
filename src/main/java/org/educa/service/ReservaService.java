@@ -19,11 +19,6 @@ import java.util.List;
 public class ReservaService {
     ReservaDAO reservaDAO = new ReservaDAOImpl();
 
-    //Este metodo No lo he usado, pero lo tenias puesto y como no se puede modificar el service..
-    public List<ReservaEntity> findReservasByVueloId(Integer vueloId) {
-        return reservaDAO.findReservasByVueloId(vueloId);
-    }
-
     /**
      * Este metodo busca por el id, la reserva correspondiente
      *
@@ -57,7 +52,7 @@ public class ReservaService {
      * Este metodo busca las reservas que tengan un precio mayor o igual que el especificado.
      *
      * @param cantidad Precio a comprobar
-     * @return
+     * @return Se devuelve una lista de reservas
      */
     public List<ReservaWithRelations> findReservasByCantidad(BigDecimal cantidad) {
         return reservaDAO.findReservasByCantidad(cantidad);
