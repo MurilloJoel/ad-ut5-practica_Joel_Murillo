@@ -25,8 +25,8 @@ import java.util.List;
  */
 
 public class VueloDAOImpl implements VueloDAO {
-    private final static String COLLECTION_VUELOS = "vuelos";
-    private final static String COLLECTION_RESERVAS = "reservas";
+    private static final String COLLECTION_VUELOS = "vuelos";
+    private static final String COLLECTION_RESERVAS = "reservas";
     private final Gson gson = new GsonBuilder().create();
 
     /**

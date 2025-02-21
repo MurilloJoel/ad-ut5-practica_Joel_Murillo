@@ -137,17 +137,7 @@ public class ReservaDAOImpl implements ReservaDAO {
         }
     }
 
-    /**
-     * Este metodo no lo he usado, pero deberia devolverte una lista de reservas por un id
-     *
-     * @param vueloId Id del vuelo
-     * @return Lista de reservas
-     */
-    @Override
-    public List<ReservaEntity> findReservasByVueloId(Integer vueloId) {
 
-        return List.of();
-    }
 
     /**
      * Busca la reserva a traves del pasaporte

@@ -15,8 +15,6 @@ import java.util.List;
 public interface ReservaDAO {
     Integer save(ReservaEntity reserva);
 
-    List<ReservaEntity> findReservasByVueloId(Integer vueloId);
-
     InfoPasajero findReservasByPasaporte(String pasaporte);
 
     List<ReservaWithRelations> findReservasByCantidad(BigDecimal cantidad);
